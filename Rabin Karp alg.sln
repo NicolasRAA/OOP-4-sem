@@ -1,25 +1,78 @@
-﻿
-Microsoft Visual Studio Solution File, Format Version 12.00
-# Visual Studio Version 17
-VisualStudioVersion = 17.13.35818.85 d17.13
-MinimumVisualStudioVersion = 10.0.40219.1
-Project("{FAE04EC0-301F-11D3-BF4B-00C04F79EFBC}") = "Rabin Karp alg", "Rabin Karp alg\Rabin Karp alg.csproj", "{332E4B54-1EFC-4678-A02A-EF9DCC0DAC7F}"
-EndProject
-Global
-	GlobalSection(SolutionConfigurationPlatforms) = preSolution
-		Debug|Any CPU = Debug|Any CPU
-		Release|Any CPU = Release|Any CPU
-	EndGlobalSection
-	GlobalSection(ProjectConfigurationPlatforms) = postSolution
-		{332E4B54-1EFC-4678-A02A-EF9DCC0DAC7F}.Debug|Any CPU.ActiveCfg = Debug|Any CPU
-		{332E4B54-1EFC-4678-A02A-EF9DCC0DAC7F}.Debug|Any CPU.Build.0 = Debug|Any CPU
-		{332E4B54-1EFC-4678-A02A-EF9DCC0DAC7F}.Release|Any CPU.ActiveCfg = Release|Any CPU
-		{332E4B54-1EFC-4678-A02A-EF9DCC0DAC7F}.Release|Any CPU.Build.0 = Release|Any CPU
-	EndGlobalSection
-	GlobalSection(SolutionProperties) = preSolution
-		HideSolutionNode = FALSE
-	EndGlobalSection
-	GlobalSection(ExtensibilityGlobals) = postSolution
-		SolutionGuid = {54150111-8FD0-447B-84B0-415227DAB4CA}
-	EndGlobalSection
-EndGlobal
+using System;
+
+class Program
+{
+    static void Main(string[] args)
+    {
+        Console.WriteLine("Enter the pattern S:");
+        string s = Console.ReadLine();
+
+        Console.WriteLine("Enter the text T:");
+        string t = Console.ReadLine();
+
+        RabinKarp(s, t);
+    }
+
+    static void RabinKarp(string s, string t)
+    {
+        int p = 31; 
+        int n = s.Length; // Length pattern S
+        int m = t.Length; // Length text T
+
+        // powers of p
+        int[] p_pow = new int[Math.Max(n, m)];
+        p_pow[0] = 1;
+        for (int i = 1; i < p_pow.Length; i++)
+        {
+            p_pow[i] = p_pow[i - 1] * p;
+        }
+
+        // hash S
+        int s_hash = 0;
+        for (int i = 0; i < n; i++)
+        {
+            s_hash += (s[i] - 'a' + 1) * p_pow[i];
+        }
+
+        // hashes prefixes T
+        int[] t_hashes = new int[m];
+        for (int i = 0; i < m; i++)
+        {
+            t_hashes[i] = (t[i] - 'a' + 1) * p_pow[i];
+            if (i > 0)
+            {
+                t_hashes[i] += t_hashes[i - 1];
+            }
+        }
+
+        // occurrences of S in T
+        Console.WriteLine("\nPositions where S appears in T:");
+        for (int i = 0; i <= m - n; i++)
+        {
+            int current_hash = t_hashes[i + n - 1];
+            if (i > 0)
+            {
+                current_hash -= t_hashes[i - 1];
+            }
+
+            if (current_hash == s_hash * p_pow[i])
+            {
+                // if strings are actually equal (handle hash collisions)
+                bool match = true;
+                for (int j = 0; j < n; j++)
+                {
+                    if (s[j] != t[i + j])
+                    {
+                        match = false;
+                        break;
+                    }
+                }
+
+                if (match)
+                {
+                    Console.WriteLine(i);
+                }
+            }
+        }
+    }
+}
